@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfOrganizingMap", "SelfOrganizingMap\SelfOrganizingMap.csproj", "{E7FEEDC7-8B52-4DDF-9BE6-B724CC8458BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfOrganizingMap.Test", "SelfOrganizingMap.Test\SelfOrganizingMap.Test.csproj", "{922CC01F-E6B6-432E-9A92-A5F887DB3595}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E7FEEDC7-8B52-4DDF-9BE6-B724CC8458BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7FEEDC7-8B52-4DDF-9BE6-B724CC8458BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7FEEDC7-8B52-4DDF-9BE6-B724CC8458BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7FEEDC7-8B52-4DDF-9BE6-B724CC8458BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{922CC01F-E6B6-432E-9A92-A5F887DB3595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{922CC01F-E6B6-432E-9A92-A5F887DB3595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{922CC01F-E6B6-432E-9A92-A5F887DB3595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{922CC01F-E6B6-432E-9A92-A5F887DB3595}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
