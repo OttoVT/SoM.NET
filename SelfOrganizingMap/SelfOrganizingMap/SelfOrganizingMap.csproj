@@ -40,6 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Maps\KohonenMap.cs" />
+    <Compile Include="Maps\KohonenMapTraining.cs" />
     <Compile Include="Math\FunctionCalculator.cs" />
     <Compile Include="Math\Functions.cs" />
     <Compile Include="Math\Vector.cs" />
@@ -50,6 +52,7 @@
     <Compile Include="Neuron.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\Entities\FunctionResult.cs" />
+    <Compile Include="Utils\KohonenMapConstants.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
