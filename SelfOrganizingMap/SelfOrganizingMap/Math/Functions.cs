@@ -8,6 +8,15 @@ namespace SelfOrganizingMap.Math
 {
     public static class Functions
     {
+        public static double CalculateNormOfVectors(Vector<double> vector1, Vector<double> vector2)
+        {
+            double value = 0;
+            for (int i = 0; i < vector1.Size; i++)
+                value += System.Math.Pow((vector1[i] - vector2[i]), 2);
+            value = System.Math.Sqrt(value);
+
+            return value;
+        }
         /// <summary>
         /// Returns Normalized double Vector
         /// </summary>

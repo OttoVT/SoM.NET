@@ -11,50 +11,101 @@ namespace SelfOrganizingMap.Maps
     public class KohonenMapTraining
     {
         private KohonenMap _map;
+        private int _mapSize;
         private readonly KohonenMapConstants _constants;
+        private double _minErrorToStop;
+        private double _currentError = 100;
+
+        public KohonenMapTraining(KohonenMap map, KohonenMapConstants constants, double minErrorToStop) 
+            : this(map, constants)
+        {
+            _minErrorToStop = minErrorToStop;
+            _currentError = minErrorToStop * 100;
+        }
+
         public KohonenMapTraining(KohonenMap map, KohonenMapConstants constants)
         {
             _map = map;
+            _mapSize = _map.Map.GetLength(0);
             _constants = constants;
         }
 
         public void TrainOnce(Vector<double> vector, int iteration)
         {
-            Tuple<int, int> BMU = _map.ConcurrencyFunction(vector);
-            Neuron<Double> bmuNeuron = _map.Map[BMU.Item1, BMU.Item2];
-            //var weights = bmuNeuron.Weights;
-            double learningRateValue = DecayLearningRate(iteration);
+            Point BMU = _map.ConcurrencyFunction(vector);
             double neighborhood = DecayNeighborhood(iteration);
-            #region Update BMU
 
-            //Vector<double> vectorDifference = vector - weights;
-            //Vector<double> result = weights + (dynamic)influenceValue * learningRateValue * vectorDifference;
-            //neuron.Weights = result;
-            #endregion
+            Dictionary<Point, Neuron<double>> neighborhs =
+                GetNeighborhood((int)neighborhood, BMU);
 
-            var neighborhs = GetNeighborhood((int)System.Math.Floor(neighborhood), BMU);
-
-            foreach (var neuron in neighborhs)
+            foreach (var kvp in neighborhs)
             {
-                double distance = neuron.Distance(vector);
-                double influenceValue = DecayInfluence(iteration, distance, neighborhood);
-                var weights = neuron.Weights;
-                Vector<double> vectorDifference = vector - weights;
-                Vector<double> result = weights + vectorDifference * (dynamic)learningRateValue;
-                neuron.Weights = result;
+                var neuron = kvp.Value;
+                var point = kvp.Key;
+                _currentError += ModifyWeights(neuron, vector, BMU, point, iteration);
+            }
+
+            _currentError = System.Math.Abs(_currentError / (_mapSize * _mapSize));
+        }
+
+        public void TrainOnSet(Vector<double>[] trainingSet, int iteration)
+        {
+            for (int j = 0; j < trainingSet.Count(); j++)
+            {
+                var set = trainingSet[j];
+                TrainOnce(set, iteration);
             }
         }
 
         public void TrainOnSetNTimes(Vector<double>[] trainingSet, int iterationsCount)
         {
-            for (int i = 0; i < iterationsCount; i++)
+
+            for (int i = 0; i < iterationsCount ; i++) //&& _minErrorToStop < _currentError
             {
-                for (int j = 0; j < trainingSet.Count(); j++)
-                {
-                    var set = trainingSet[j];
-                    TrainOnce(set, i);
-                }
+                TrainOnSet(trainingSet, i);
             }
+        }
+
+        public void TrainOnSetsNTimes(List<Vector<double>> patterns, int iterationsCount)
+        {
+            int i = 0;
+            while (i <= iterationsCount)
+            {
+                List<Vector<double>> patternsToLearn = new List<Vector<double>>(patterns.Count);
+                foreach (Vector<double> pArray in patterns)
+                    patternsToLearn.Add(pArray);
+                Random randomPattern = new Random();
+                Vector<double> pattern;
+                for (int j = 0; j < patterns.Count; j++)
+                {
+                    pattern = patternsToLearn[randomPattern.Next(patterns.Count - j)];
+
+                    TrainOnce(pattern, i);
+
+                    patternsToLearn.Remove(pattern);
+                }
+                i++;
+            }
+        }
+
+        private double ModifyWeights(Neuron<double> neuron, 
+            Vector<double> vector,
+            Point winnerCoordinate,
+            Point neuronCoordinate,
+            int iteration)
+        {
+            var weights = neuron.Weights;
+            double avgDelta = 0;
+            double modificationValue = 0;
+            for (int i = 0; i < vector.Size; i++)
+            {
+                modificationValue = DecayLearningRate(iteration) *
+                    DecayInfluence(winnerCoordinate, neuronCoordinate, iteration) * (vector[i] - weights[i]);
+                weights.Object[i] += modificationValue;
+                avgDelta += modificationValue;
+            }
+            avgDelta = avgDelta / vector.Size;
+            return avgDelta;
         }
 
         private double DecayNeighborhood(int iterataion)
@@ -67,25 +118,29 @@ namespace SelfOrganizingMap.Maps
         private double DecayLearningRate(int iterataion)
         {
             var power = -iterataion / _constants.LearningRateDecay;
-            var calulatedNeighborhood = _constants.StartLearningRate * System.Math.Exp(power);
-            return calulatedNeighborhood;
+            var calulatedLearningRate = _constants.StartLearningRate * System.Math.Exp(power);
+            return calulatedLearningRate;
         }
 
-        private double DecayInfluence(int iterataion, double distance, double neighborhood)
+        private double DecayInfluence(Point winnerCoordinate, Point neuron, int iteration)
         {
-            //var neighborhood = DecayNeighborhood(iterataion);
-            var power = -(distance * distance) / (2 * neighborhood * neighborhood);
-            var calulatedInfluence = System.Math.Exp(power);
-            return calulatedInfluence;
+            double result = 0;
+            double distance = 0;
+            distance = System.Math.Sqrt(System.Math.Pow((winnerCoordinate.X - neuron.X), 2)
+                    + System.Math.Pow((winnerCoordinate.Y - neuron.Y), 2));
+            result = System.Math.Exp(-(distance * distance) / (System.Math.Pow(DecayNeighborhood(iteration), 2)));
+
+            return result;
+
         }
 
-        private IEnumerable<Neuron<double>> GetNeighborhood(int neighborhood, Tuple<int,int> bmuCoordinats)
+        private Dictionary<Point, Neuron<double>> GetNeighborhood(int neighborhood, Point bmuCoordinats)
         {
             int mapSize = _map.Map.GetLength(0);
-            var lisOfNeighborhs = new List<Neuron<double>>(mapSize);
-            int x = bmuCoordinats.Item1;
-            int y = bmuCoordinats.Item2;
-            int leftBorder = x - neighborhood; 
+            var lisOfNeighborhs = new Dictionary<Point, Neuron<double>>(mapSize);
+            int x = bmuCoordinats.X;
+            int y = bmuCoordinats.Y;
+            int leftBorder = x - neighborhood;
             int rightBorder = x + neighborhood;
             int topBorder = y - neighborhood;
             int bottomBorder = y + neighborhood;
@@ -98,7 +153,7 @@ namespace SelfOrganizingMap.Maps
             {
                 for (int j = leftBorder; j < rightBorder; j++)
                 {
-                    lisOfNeighborhs.Add(_map.Map[i, j]);
+                    lisOfNeighborhs.Add(new Point(i, j), _map.Map[i, j]);
                 }
             }
 

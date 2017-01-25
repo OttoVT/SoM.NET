@@ -44,6 +44,7 @@
     <Compile Include="Maps\KohonenMapTraining.cs" />
     <Compile Include="Math\FunctionCalculator.cs" />
     <Compile Include="Math\Functions.cs" />
+    <Compile Include="Math\Point.cs" />
     <Compile Include="Math\Vector.cs" />
     <Compile Include="Networks\KohonenNetwork.cs" />
     <Compile Include="Networks\Training\KohonenNetworkTrainingImplementation.cs" />

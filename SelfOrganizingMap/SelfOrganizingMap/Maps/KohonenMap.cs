@@ -23,27 +23,27 @@ namespace SelfOrganizingMap.Maps
             _sizeOfMap = _map.GetLength(0);
         }
 
-        public virtual Tuple<int, int> ConcurrencyFunction(Vector<double> vector)
+        public virtual Point ConcurrencyFunction(Vector<double> vector)
         {
             int size = _map.GetLength(0);
             int winnerPosition = 0;
-            double max = double.MaxValue;
+            double min = _map[0, 0].Distance(vector);
             int neuronAmont = size * size;
-            for (int i = 0; i < neuronAmont; i++)
+            for (int i = 1; i < neuronAmont; i++)
             {
                 var row = i / size;
                 var column = i % size;
 
                 var neuron = _map[row, column];
                 var result = neuron.Distance(vector);
-                if (max.CompareTo(result) > 0)
+                if (min.CompareTo(result) > 0)
                 {
-                    max = result;
+                    min = result;
                     winnerPosition = i;
                 }
             }
 
-            return Tuple.Create(winnerPosition / size, winnerPosition % size);
+            return new Point(winnerPosition / size, winnerPosition % size);
         }
     }
 }
