@@ -42,8 +42,6 @@
   <ItemGroup>
     <Compile Include="Maps\KohonenMap.cs" />
     <Compile Include="Maps\KohonenMapTraining.cs" />
-    <Compile Include="Maps\V2\Map.cs" />
-    <Compile Include="Maps\V2\Neuron.cs" />
     <Compile Include="Math\FunctionCalculator.cs" />
     <Compile Include="Math\Functions.cs" />
     <Compile Include="Math\Point.cs" />
