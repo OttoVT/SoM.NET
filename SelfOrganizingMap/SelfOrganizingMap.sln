@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfOrganizingMap", "SelfOr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfOrganizingMap.Test", "SelfOrganizingMap.Test\SelfOrganizingMap.Test.csproj", "{922CC01F-E6B6-432E-9A92-A5F887DB3595}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfOrganizingMap.Visualizer", "SelfOrganizingMap.Visualizer\SelfOrganizingMap.Visualizer.csproj", "{D752E989-953D-478D-9244-89AF7A218AF2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{922CC01F-E6B6-432E-9A92-A5F887DB3595}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{922CC01F-E6B6-432E-9A92-A5F887DB3595}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{922CC01F-E6B6-432E-9A92-A5F887DB3595}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D752E989-953D-478D-9244-89AF7A218AF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D752E989-953D-478D-9244-89AF7A218AF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D752E989-953D-478D-9244-89AF7A218AF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D752E989-953D-478D-9244-89AF7A218AF2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

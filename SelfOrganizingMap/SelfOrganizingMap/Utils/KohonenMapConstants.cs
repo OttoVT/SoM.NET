@@ -16,13 +16,11 @@ namespace SelfOrganizingMap.Utils
         public double LearningRateDecay { get { return _learningRateDecay; }}
         public double NeighborhoodDecay { get { return _neighborhoodDecay; }}
         public double StartLearningRate { get { return _startLearningRate; }}
-        public double StartNeighborhood { get { return _startNeighborhood; } }
 
-        public KohonenMapConstants(double startNeighborhood,
+        public KohonenMapConstants(double mapSize,
             double startLearningRate, double learningRateDecay, double iterationAmount)
         {
-            _startNeighborhood = startNeighborhood;
-            _neighborhoodDecay = iterationAmount / System.Math.Log(startNeighborhood);
+            _neighborhoodDecay = iterationAmount / System.Math.Log(mapSize);
             _startLearningRate = startLearningRate;
             _learningRateDecay = learningRateDecay;
         }

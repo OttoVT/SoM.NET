@@ -13,14 +13,17 @@ namespace SelfOrganizingMap.Maps
         private KohonenMap _map;
         private int _mapSize;
         private readonly KohonenMapConstants _constants;
-        private double _minErrorToStop;
+        private double _maxErrorToStop;
         private double _currentError = 100;
+        private bool _stopOnEpoch;
 
-        public KohonenMapTraining(KohonenMap map, KohonenMapConstants constants, double minErrorToStop) 
+        public KohonenMapTraining(KohonenMap map, KohonenMapConstants constants, double maxErrorToStop,
+            bool stopOnEpoch)
             : this(map, constants)
         {
-            _minErrorToStop = minErrorToStop;
-            _currentError = minErrorToStop * 100;
+            _maxErrorToStop = maxErrorToStop;
+            _currentError = maxErrorToStop * 100;
+            _stopOnEpoch = stopOnEpoch;
         }
 
         public KohonenMapTraining(KohonenMap map, KohonenMapConstants constants)
@@ -30,24 +33,32 @@ namespace SelfOrganizingMap.Maps
             _constants = constants;
         }
 
-        public void TrainOnce(Vector<double> vector, int iteration)
+
+        public double TrainOnce(Vector<double> vector, int iteration)
         {
-            Point BMU = _map.ConcurrencyFunction(vector);
+            double error = 0;
+            Neuron<double>[,] outputs = _map.Map;
+            Point winnerCoordinate = _map.ConcurrencyFunction(vector);
             double neighborhood = DecayNeighborhood(iteration);
 
-            Dictionary<Point, Neuron<double>> neighborhs =
-                GetNeighborhood((int)neighborhood, BMU);
+            for (int i = 0; i < _mapSize; i++)
+                for (int j = 0; j < _mapSize; j++)
+                {
+                    var topologicalDistance = System.Math.Sqrt(System.Math.Pow((winnerCoordinate.X - i), 2) +
+                        System.Math.Pow((winnerCoordinate.Y - j), 2));
+                    if (topologicalDistance < neighborhood)
+                    {
+                        var neuron = outputs[i, j];
+                        Point point = new Point(i, j);
 
-            foreach (var kvp in neighborhs)
-            {
-                var neuron = kvp.Value;
-                var point = kvp.Key;
-                _currentError += ModifyWeights(neuron, vector, BMU, point, iteration);
-            }
+                        error += ModifyWeights(neuron, vector, winnerCoordinate, point, iteration);
+                    }
+                }
+            error = System.Math.Abs(error / (_mapSize * _mapSize));
 
-            _currentError = System.Math.Abs(_currentError / (_mapSize * _mapSize));
+            return error;
         }
-
+        /*
         public void TrainOnSet(Vector<double>[] trainingSet, int iteration)
         {
             for (int j = 0; j < trainingSet.Count(); j++)
@@ -87,8 +98,52 @@ namespace SelfOrganizingMap.Maps
                 i++;
             }
         }
+        */
 
-        private double ModifyWeights(Neuron<double> neuron, 
+        public void FullTrain(List<Vector<double>> patterns, int iterationsCount)
+        {
+            double currentError = double.MaxValue;
+            int ieration = 0;
+
+            while (true)
+            {
+                List<Vector<double>> TrainingSet = new List<Vector<double>>(patterns);
+
+                currentError = 0;
+
+                for (int i = 0; i < patterns.Count; i++)
+                {
+                    Vector<double> pattern = TrainingSet[new Random(DateTime.Now.Millisecond).Next(patterns.Count - i)];
+
+                    currentError = TrainOnce(pattern, ieration);
+                    //if (CriticalEpochPassed)
+                    //{
+                    //    currentError += InstantTrain(pattern);
+                    //}
+                    //else
+                    //{ 
+                    //    currentError += FastTrainWithCheckCriticalEpoch(pattern);
+                    //}
+
+                    TrainingSet.Remove(pattern);
+                }
+
+                ieration++;
+
+                //if ((!CriticalEpochPassed) && (!difference_detected))
+                //        CriticalEpochPassed = true;
+                //    else
+                //        difference_detected = false;
+
+                if (_stopOnEpoch && ieration >= iterationsCount)
+                    break;
+                else if (!_stopOnEpoch && currentError <= _maxErrorToStop)
+                    break;
+            }
+        }
+
+        #region Private
+        private double ModifyWeights(Neuron<double> neuron,
             Vector<double> vector,
             Point winnerCoordinate,
             Point neuronCoordinate,
@@ -97,27 +152,34 @@ namespace SelfOrganizingMap.Maps
             var weights = neuron.Weights;
             double avgDelta = 0;
             double modificationValue = 0;
+            double learningRate = DecayLearningRate(iteration);
+            double influence = DecayInfluence(winnerCoordinate, neuronCoordinate, iteration);
+
             for (int i = 0; i < vector.Size; i++)
             {
-                modificationValue = DecayLearningRate(iteration) *
-                    DecayInfluence(winnerCoordinate, neuronCoordinate, iteration) * (vector[i] - weights[i]);
+                modificationValue = learningRate *
+                    influence *
+                    (vector[i] - weights[i]);
                 weights.Object[i] += modificationValue;
                 avgDelta += modificationValue;
             }
+
             avgDelta = avgDelta / vector.Size;
+
             return avgDelta;
         }
 
-        private double DecayNeighborhood(int iterataion)
+        private double DecayNeighborhood(int iteration)
         {
-            var power = -iterataion / _constants.NeighborhoodDecay;
-            var calulatedNeighborhood = _constants.StartNeighborhood * System.Math.Exp(power);
+            var power = -iteration / _constants.NeighborhoodDecay;
+            //var calulatedNeighborhood = _constants.StartNeighborhood * System.Math.Exp(power);
+            var calulatedNeighborhood = _mapSize * System.Math.Exp(power);
             return calulatedNeighborhood;
         }
 
-        private double DecayLearningRate(int iterataion)
+        private double DecayLearningRate(int iteration)
         {
-            var power = -iterataion / _constants.LearningRateDecay;
+            var power = -iteration / _constants.LearningRateDecay;
             var calulatedLearningRate = _constants.StartLearningRate * System.Math.Exp(power);
             return calulatedLearningRate;
         }
@@ -126,9 +188,11 @@ namespace SelfOrganizingMap.Maps
         {
             double result = 0;
             double distance = 0;
+            double neighborhood = DecayNeighborhood(iteration);
+
             distance = System.Math.Sqrt(System.Math.Pow((winnerCoordinate.X - neuron.X), 2)
                     + System.Math.Pow((winnerCoordinate.Y - neuron.Y), 2));
-            result = System.Math.Exp(-(distance * distance) / (System.Math.Pow(DecayNeighborhood(iteration), 2)));
+            result = System.Math.Exp(-(distance * distance) / (System.Math.Pow(neighborhood, 2)));
 
             return result;
 
@@ -159,5 +223,7 @@ namespace SelfOrganizingMap.Maps
 
             return lisOfNeighborhs;
         }
+
+        #endregion
     }
 }
