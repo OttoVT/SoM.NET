@@ -7,7 +7,6 @@ using SelfOrganizingMap.Maps;
 using SelfOrganizingMap.Utils;
 using System.Diagnostics;
 using System.Collections.Generic;
-using SelfOrganizingMap.Maps.V2;
 
 namespace SelfOrganizingMap.Test
 {

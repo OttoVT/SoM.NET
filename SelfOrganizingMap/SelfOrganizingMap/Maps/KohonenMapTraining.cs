@@ -58,47 +58,6 @@ namespace SelfOrganizingMap.Maps
 
             return error;
         }
-        /*
-        public void TrainOnSet(Vector<double>[] trainingSet, int iteration)
-        {
-            for (int j = 0; j < trainingSet.Count(); j++)
-            {
-                var set = trainingSet[j];
-                TrainOnce(set, iteration);
-            }
-        }
-
-        public void TrainOnSetNTimes(Vector<double>[] trainingSet, int iterationsCount)
-        {
-
-            for (int i = 0; i < iterationsCount ; i++) //&& _minErrorToStop < _currentError
-            {
-                TrainOnSet(trainingSet, i);
-            }
-        }
-
-        public void TrainOnSetsNTimes(List<Vector<double>> patterns, int iterationsCount)
-        {
-            int i = 0;
-            while (i <= iterationsCount)
-            {
-                List<Vector<double>> patternsToLearn = new List<Vector<double>>(patterns.Count);
-                foreach (Vector<double> pArray in patterns)
-                    patternsToLearn.Add(pArray);
-                Random randomPattern = new Random();
-                Vector<double> pattern;
-                for (int j = 0; j < patterns.Count; j++)
-                {
-                    pattern = patternsToLearn[randomPattern.Next(patterns.Count - j)];
-
-                    TrainOnce(pattern, i);
-
-                    patternsToLearn.Remove(pattern);
-                }
-                i++;
-            }
-        }
-        */
 
         public void FullTrain(List<Vector<double>> patterns, int iterationsCount)
         {
@@ -116,24 +75,10 @@ namespace SelfOrganizingMap.Maps
                     Vector<double> pattern = TrainingSet[new Random(DateTime.Now.Millisecond).Next(patterns.Count - i)];
 
                     currentError = TrainOnce(pattern, ieration);
-                    //if (CriticalEpochPassed)
-                    //{
-                    //    currentError += InstantTrain(pattern);
-                    //}
-                    //else
-                    //{ 
-                    //    currentError += FastTrainWithCheckCriticalEpoch(pattern);
-                    //}
-
                     TrainingSet.Remove(pattern);
                 }
 
                 ieration++;
-
-                //if ((!CriticalEpochPassed) && (!difference_detected))
-                //        CriticalEpochPassed = true;
-                //    else
-                //        difference_detected = false;
 
                 if (_stopOnEpoch && ieration >= iterationsCount)
                     break;
